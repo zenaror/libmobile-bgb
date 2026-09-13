@@ -185,7 +185,9 @@ void device_auth_notify(struct device_auth_state *state, enum mobile_device_auth
     req->started = time(NULL);
     req->is_query = false;
 
-    // TEMPORARY (integration-testing phase): log every outgoing request.
+    // Kept permanently, not just for integration testing: this is the
+    // only visibility into "why didn't my mail authorize" a user has,
+    // short of a packet capture.
     fprintf(stderr, "[device-auth] -> %.*s (connecting to %s)\n",
         (int)line_len, req->data, host);
 
@@ -328,7 +330,9 @@ static void request_poll_drain(struct device_auth_request *req)
                     mobile_device_auth_query_result(req->adapter, NULL, 0);
                 }
             } else {
-                // TEMPORARY (integration-testing phase): confirm delivery.
+                // The other half of the request log above: confirms the
+                // server actually finished answering, not just that we
+                // sent something.
                 fprintf(stderr, "[device-auth] <- response drained, "
                     "closing\n");
             }

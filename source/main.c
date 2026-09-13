@@ -163,27 +163,12 @@ static void impl_update_number(void *user, enum mobile_number type, const char *
 static void impl_update_device_auth(void *user, enum mobile_device_auth_action action, const unsigned char *ppp_id, unsigned ppp_id_size, uint64_t counter, const unsigned char *sig, const unsigned char *addr_ipv4, const char *device)
 {
     struct mobile_user *mobile = user;
-    // TEMPORARY (integration-testing phase): confirm the core is firing
-    // the callback at all, before device_auth even gets involved.
-    fprintf(stderr, "[device-auth] callback fired: action=%s ppp_id=\"%.*s\" "
-        "counter=%" PRIu64 " addr=%u.%u.%u.%u device=%s\n",
-        action == MOBILE_DEVICE_AUTH_AUTHORIZE ? "authorize" : "deauthorize",
-        (int)ppp_id_size, ppp_id, counter,
-        addr_ipv4[0], addr_ipv4[1], addr_ipv4[2], addr_ipv4[3],
-        device ? device : "(none)");
     device_auth_notify(&mobile->device_auth, action, ppp_id, ppp_id_size, counter, sig, addr_ipv4, device);
 }
 
 static bool impl_device_auth_query(void *user, const unsigned char *addr_ipv4, const unsigned char *ppp_id, unsigned ppp_id_size, uint64_t counter, const unsigned char *sig, const char *device)
 {
     struct mobile_user *mobile = user;
-    // TEMPORARY (integration-testing phase): confirm the core is firing
-    // the callback at all, before device_auth even gets involved.
-    fprintf(stderr, "[device-auth] query callback fired: ppp_id=\"%.*s\" "
-        "counter=%" PRIu64 " addr=%u.%u.%u.%u device=%s\n",
-        (int)ppp_id_size, ppp_id, counter,
-        addr_ipv4[0], addr_ipv4[1], addr_ipv4[2], addr_ipv4[3],
-        device ? device : "(none)");
     return device_auth_query_notify(&mobile->device_auth, mobile->adapter,
         addr_ipv4, ppp_id, ppp_id_size, counter, sig, device);
 }

@@ -621,6 +621,18 @@ int main(int argc, char *argv[])
             mobile_device_auth_get_id(mobile->adapter, device_id)) {
         fprintf(stderr, "[device-auth] Pairing code: %s (device id %s)\n",
             pairing_code, device_id);
+
+        // A pairing code only says this installation has an identity; it
+        // says nothing about whether mail auth can actually work, which
+        // needs a device_auth_key on top of that. Warn here rather than
+        // let the game find out later that mail just doesn't work -- with
+        // no plain-auth fallback, no key means no mail at all.
+        unsigned char key[MOBILE_DEVICE_AUTH_KEY_SIZE];
+        if (!mobile_config_get_device_auth_key(mobile->adapter, key)) {
+            fprintf(stderr, "[device-auth] No mail key yet - download "
+                "mobile_config.bin from your account and put it in this "
+                "program's folder; mail will not work until then.\n");
+        }
     } else {
         fprintf(stderr, "[device-auth] No device identity available; "
             "using the account's unnamed device\n");

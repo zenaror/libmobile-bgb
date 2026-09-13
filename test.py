@@ -462,8 +462,15 @@ class MobileProcess:
 
     @staticmethod
     def _drain(pipe, chunks):
+        # read1(), not read(): a BufferedReader's plain read(n) blocks
+        # until it has n bytes or hits EOF, which for a chatty-but-not-
+        # 4096-bytes-yet child means it never returns while the process is
+        # still running -- invisible to anything (like
+        # test_device_auth_blocked) that wants to observe output live
+        # rather than only after the process exits. read1() returns
+        # whatever one underlying read() call produced, however little.
         try:
-            for chunk in iter(lambda: pipe.read(4096), b""):
+            for chunk in iter(lambda: pipe.read1(4096), b""):
                 chunks.append(chunk)
         except (ValueError, OSError):
             pass

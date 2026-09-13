@@ -831,6 +831,20 @@ def device_auth_sig(key, ppp_id, action, counter, device=None):
     return hmac.new(key, msg, hashlib.sha256).hexdigest()
 
 
+def device_auth_query_response_sig(key, ppp_id, device, value, echo=None):
+    # value is a decimal counter string or "blocked"; echo, when given, is
+    # the decimal counter the query spent -- see be1c4fc in the core for
+    # why an answer may or may not carry one.
+    parts = [ppp_id]
+    if device is not None:
+        parts.append(device)
+    parts += ["query-response", value]
+    if echo is not None:
+        parts.append(echo)
+    msg = "|".join(parts).encode()
+    return hmac.new(key, msg, hashlib.sha256).hexdigest()
+
+
 class Tests(unittest.TestCase):
     @mobile_process_test("--device", "9")
     def test_simple(self, m):
@@ -1100,6 +1114,93 @@ class Tests(unittest.TestCase):
                     key, "g000000034", "deauthorize", params["counter"],
                     device))
 
+                m.cmd_offline()
+                m.cmd_end()
+            finally:
+                m_proc.close()
+
+    @unittest.skipUnless(
+        hasattr(os, "geteuid") and os.geteuid() == 0,
+        "Needs to bind ports 110 and 80 to stand in as the fake POP3 and "
+        "device-auth servers the emulated game/adapter connect to -- the "
+        "real 'mobile' process itself never binds either, it only ever "
+        "connects out to them (device-auth's address/port aren't "
+        "overridable from the CLI, on purpose -- see main.c), so this is "
+        "purely a test-environment requirement, not a product one.")
+    def test_device_auth_blocked(self):
+        # block_state is the least-exercised path in the whole device-auth
+        # side channel: a blocked device is rare, so the code that reacts
+        # to it only ever runs once someone has already been locked out --
+        # exactly the kind of path that hides a bug until it's too late to
+        # be a minor one. This is the one device-auth test that goes past
+        # authorize/deauthorize into the counter-query/block-detection
+        # round trip.
+        key = bytes(range(32))
+        provision_device_auth("config_test.bin", key)
+        device_auth_port = 80
+
+        with SimpleDNSServer():
+            m_proc = MobileProcess("--dns1", "127.0.0.1", "--dns_port", "8753")
+            m_proc.run()
+            m = m_proc.mob
+            try:
+                m.cmd_start()
+                m.cmd_tel("0755311973")
+
+                # mobile_device_auth_session_start() (fired from
+                # command_ppp_connect()) queues a counter query before
+                # anything else, and the address was already resolved
+                # proactively (a key and a DNS server have been available
+                # since the process started) -- so the query goes out
+                # immediately once this connects, no mail port involved.
+                with SimpleTCPServer("127.0.0.1", device_auth_port) as auth:
+                    m.cmd_ppp_connect(s_id="g000000034")
+                    auth.accept()
+                    req = auth.recv(4096).decode()
+                    line = req.split("\r\n", 1)[0]
+                    self.assertTrue(
+                        line.startswith("GET /api/adapter/device-auth?"))
+                    query = line.split("?", 1)[1].split(" ", 1)[0]
+                    params = dict(p.split("=", 1) for p in query.split("&"))
+                    self.assertEqual(params["ppp_id"], "g000000034")
+                    self.assertEqual(params["action"], "query")
+                    self.assertIn("counter", params)
+                    device = params.get("device")
+                    if device is not None:
+                        self.assertRegex(device, r"^[0-9a-f]{16}$")
+
+                    # A genuine, signed "blocked" answer, echoing the
+                    # counter this query spent -- the freshness check that
+                    # tells this apart from a recorded answer replayed
+                    # later (see be1c4fc/mobile_device_auth_query_result()
+                    # in the core).
+                    echo = params["counter"]
+                    sig = device_auth_query_response_sig(
+                        key, "g000000034", device, "blocked", echo)
+                    body = f"blocked {echo} {sig}".encode()
+                    auth.send(b"HTTP/1.1 200 OK\r\nContent-Length: " +
+                        str(len(body)).encode() +
+                        b"\r\nConnection: close\r\n\r\n" + body)
+
+                # device_auth_poll() delivers the body and prints the
+                # block notice off the main loop, not synchronously with
+                # the HTTP response arriving -- poll stderr instead of
+                # sleeping a fixed amount.
+                for _ in range(50):
+                    if b"BLOCKED" in b"".join(m_proc.err_chunks):
+                        break
+                    time.sleep(0.1)
+                self.assertIn(b"BLOCKED", b"".join(m_proc.err_chunks))
+
+                # Once block_state is YES, the core refuses to open
+                # connections or resolve names for the rest of the
+                # session -- the same error the game gets with no network
+                # at all (see command_tcp_connect_begin()).
+                with self.assertRaises(MobileCmdError) as e:
+                    m.cmd_tcp_connect((127, 0, 0, 1), 110)
+                self.assertEqual(e.exception.code, 3)
+
+                m.cmd_ppp_disconnect()
                 m.cmd_offline()
                 m.cmd_end()
             finally:

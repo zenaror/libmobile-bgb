@@ -175,8 +175,8 @@ static bool impl_device_auth_query(void *user, const unsigned char *addr_ipv4, c
 
 // mobile_func_device_identity: hands the core something stable to derive
 // this installation's device id from, so the server can tell apart the
-// same account's config.bin running on different machines. Never stored
-// in config.bin itself -- that file is meant to be copied between an
+// same account's mobile_config.bin running on different machines. Never stored
+// in mobile_config.bin itself -- that file is meant to be copied between an
 // emulator and real hardware, and an id living there would identify the
 // file, not the machine (see the core's mobile.h for the full rationale).
 static unsigned impl_device_identity(void *user, void *data, unsigned size)

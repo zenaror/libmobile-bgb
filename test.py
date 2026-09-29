@@ -800,7 +800,7 @@ def mobile_process_test(*args, **kwargs):
     return _deco
 
 
-# Layout of the device-auth config.bin extension area, mirroring
+# Layout of the device-auth mobile_config.bin extension area, mirroring
 # libmobile/config.c's config_device_auth_load()/config_device_auth_save():
 # offset 0x160, 'D','A',0, a little-endian checksum over everything from
 # offset 0x05 onward, the 32-byte key, then an 8-byte little-endian counter.
@@ -1036,21 +1036,20 @@ class Tests(unittest.TestCase):
         "Needs to bind ports 110 and 80 to stand in as the fake POP3 and "
         "device-auth servers the emulated game/adapter connect to -- the "
         "real 'mobile' process itself never binds either, it only ever "
-        "connects out to them (device-auth's address/port aren't "
-        "overridable from the CLI, on purpose -- see main.c), so this is "
+        "connects out to them (device-auth's port is fixed at 80 and its "
+        "address comes from DNS -- see device_auth.c), so this is "
         "purely a test-environment requirement, not a product one.")
     def test_device_auth(self):
         key = bytes(range(32))
         provision_device_auth("config_test.bin", key)
         device_auth_port = 80
 
-        # device-auth's server address is resolved by libmobile itself now
-        # (no CLI override on our end, and no DNS client of our own either
-        # -- see the device-auth callback's new addr_ipv4 parameter), via
-        # the same --dns1/--dns2 priority the game's own DNS traffic uses.
-        # A fake DNS server answering device.auth.dion.ne.jp needs to be up
-        # for the whole test, since resolution is driven lazily off the
-        # mail-port-connect trigger below, not eagerly at startup anymore.
+        # device-auth's server address is resolved by libmobile itself (see
+        # the device-auth callback's addr_ipv4 parameter), via the same
+        # --dns1/--dns2 priority the game's own DNS traffic uses. A fake DNS
+        # server answering device.auth.dion.ne.jp needs to be up for the
+        # whole test, since resolution is driven lazily off the
+        # mail-port-connect trigger below, not at startup.
         with SimpleDNSServer():
             m_proc = MobileProcess("--dns1", "127.0.0.1", "--dns_port", "8753")
             m_proc.run()
@@ -1131,8 +1130,8 @@ class Tests(unittest.TestCase):
         "Needs to bind ports 110 and 80 to stand in as the fake POP3 and "
         "device-auth servers the emulated game/adapter connect to -- the "
         "real 'mobile' process itself never binds either, it only ever "
-        "connects out to them (device-auth's address/port aren't "
-        "overridable from the CLI, on purpose -- see main.c), so this is "
+        "connects out to them (device-auth's port is fixed at 80 and its "
+        "address comes from DNS -- see device_auth.c), so this is "
         "purely a test-environment requirement, not a product one.")
     def test_device_auth_blocked(self):
         # block_state is the least-exercised path in the whole device-auth

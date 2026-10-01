@@ -1,0 +1,16 @@
+{
+  "schema": "omm-import-v1",
+  "project": "libmobile-bgb",
+  "source_repository": "https://github.com/zenaror/libmobile-bgb",
+  "source_revision": "5db419f4a60c7fa1836b28a0718cf2ede4ae1658",
+  "submodule": {
+    "path": "subprojects/libmobile",
+    "repository": "https://github.com/REONTeam/libmobile",
+    "observed_revision": "fa645d03cc9609760a887c3f3d0ed44b1bf0ce6d",
+    "working_tree_had_local_changes": true
+  },
+  "imported_at": "2026-10-01T00:00:00+00:00",
+  "working_tree_had_preexisting_changes": true,
+  "imported_sources": ["README.md", ".gitmodules", "git status observation"],
+  "limitations": ["Uncommitted implementation changes were not treated as verified facts or included in the OMM migration commit."]
+}

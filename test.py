@@ -1057,7 +1057,7 @@ class Tests(unittest.TestCase):
             try:
                 m.cmd_start()
                 m.cmd_tel("0755311973")
-                m.cmd_ppp_connect(s_id="g000000034")
+                m.cmd_ppp_connect(s_id="g123456789")
 
                 http_ok = (b"HTTP/1.1 200 OK\r\n"
                           b"Content-Length: 0\r\nConnection: close\r\n\r\n")
@@ -1082,7 +1082,7 @@ class Tests(unittest.TestCase):
                         line.startswith("GET /api/adapter/device-auth?"))
                     query = line.split("?", 1)[1].split(" ", 1)[0]
                     params = dict(p.split("=", 1) for p in query.split("&"))
-                    self.assertEqual(params["ppp_id"], "g000000034")
+                    self.assertEqual(params["ppp_id"], "g123456789")
                     self.assertEqual(params["action"], "authorize")
                     # device is whatever this test machine's
                     # impl_device_identity() derived (/etc/machine-id,
@@ -1093,7 +1093,7 @@ class Tests(unittest.TestCase):
                     if device is not None:
                         self.assertRegex(device, r"^[0-9a-f]{16}$")
                     self.assertEqual(params["sig"], device_auth_sig(
-                        key, "g000000034", "authorize", params["counter"],
+                        key, "g123456789", "authorize", params["counter"],
                         device))
 
                     # Authorize is scoped to the whole PPP session now (not
@@ -1111,13 +1111,13 @@ class Tests(unittest.TestCase):
                 line = req.split("\r\n", 1)[0]
                 query = line.split("?", 1)[1].split(" ", 1)[0]
                 params = dict(p.split("=", 1) for p in query.split("&"))
-                self.assertEqual(params["ppp_id"], "g000000034")
+                self.assertEqual(params["ppp_id"], "g123456789")
                 self.assertEqual(params["action"], "deauthorize")
                 device = params.get("device")
                 if device is not None:
                     self.assertRegex(device, r"^[0-9a-f]{16}$")
                 self.assertEqual(params["sig"], device_auth_sig(
-                    key, "g000000034", "deauthorize", params["counter"],
+                    key, "g123456789", "deauthorize", params["counter"],
                     device))
 
                 m.cmd_offline()
@@ -1160,7 +1160,7 @@ class Tests(unittest.TestCase):
                 # since the process started) -- so the query goes out
                 # immediately once this connects, no mail port involved.
                 with SimpleTCPServer("127.0.0.1", device_auth_port) as auth:
-                    m.cmd_ppp_connect(s_id="g000000034")
+                    m.cmd_ppp_connect(s_id="g123456789")
                     auth.accept()
                     req = auth.recv(4096).decode()
                     line = req.split("\r\n", 1)[0]
@@ -1168,7 +1168,7 @@ class Tests(unittest.TestCase):
                         line.startswith("GET /api/adapter/device-auth?"))
                     query = line.split("?", 1)[1].split(" ", 1)[0]
                     params = dict(p.split("=", 1) for p in query.split("&"))
-                    self.assertEqual(params["ppp_id"], "g000000034")
+                    self.assertEqual(params["ppp_id"], "g123456789")
                     self.assertEqual(params["action"], "query")
                     self.assertIn("counter", params)
                     device = params.get("device")
@@ -1182,7 +1182,7 @@ class Tests(unittest.TestCase):
                     # in the core).
                     echo = params["counter"]
                     sig = device_auth_query_response_sig(
-                        key, "g000000034", device, "blocked", echo)
+                        key, "g123456789", device, "blocked", echo)
                     body = f"blocked {echo} {sig}".encode()
                     auth.send(b"HTTP/1.1 200 OK\r\nContent-Length: " +
                         str(len(body)).encode() +

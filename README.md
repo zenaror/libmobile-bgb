@@ -5,6 +5,8 @@ This is one of the software implementations of [libmobile](https://github.com/RE
 
 It provides BGB with the ability to emulate the [Mobile Adapter GB](https://bulbapedia.bulbagarden.net/wiki/Mobile_Game_Boy_Adapter) and connect games with homebrew servers.
 
+Parts of our modifications in this fork were developed with assistance from AI tools, including code generation. This statement applies to our modifications and does not describe the upstream project's development process.
+
 
 Usage
 -----

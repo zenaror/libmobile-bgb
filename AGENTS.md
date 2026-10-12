@@ -13,6 +13,7 @@ Este projeto liga a biblioteca libmobile ao emulador BGB (programa `mobile`). A 
 - Compile em `build/` (Linux) e em `build-windows/` com `../configure --host=x86_64-w64-mingw32 --without-system-libmobile` (Windows).
 - Rode os testes com `ln -sf build/mobile mobile && python3 test.py`. Os testes de device-auth precisam de root.
 - Não faça `git commit` nem `git push` sem a palavra do Rafael. Reescrita de histórico e force-push precisam da palavra dele na própria sessão.
+- Não insira automaticamente trailers `Co-authored-by` de Claude/Anthropic nos commits. Preserve autores, coautores e créditos humanos legítimos.
 - Não crie opção para trocar o servidor de device-auth.
 - Não grave senhas, chaves (como a `device_auth_key`) nem dados pessoais em arquivos, commits ou na OMM.
 

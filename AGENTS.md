@@ -1,27 +1,27 @@
-# Orientações para agentes
+# Agent guidance
 
-Este projeto liga a biblioteca libmobile ao emulador BGB (programa `mobile`). A linha ativa é a branch `feature/full_server`.
+This project connects libmobile to the BGB emulator through the `mobile` program. The active branch is `feature/full_server`.
 
-## Antes de começar
+## Before starting
 
-1. Consulte a memória interna e depois a OMM no escopo `libmobile-bgb`. Leia `project-base` com `get_role` na retomada; consulte global quando ajudar. Memória não substitui fatos confirmados no Git, código e evidências.
-2. Para REON, libmobile ou o protocolo Mobile Adapter GB, use a skill `reon-libmobile-expert` da OMM.
-3. Confira branch, HEAD, alterações locais e revisão de `subprojects/libmobile`, que é mantido separadamente. Preserve seu gitlink e o outro checkout. O remote deste projeto é apenas `https://github.com/zenaror/libmobile-bgb`.
-4. Use o [mapa do README](README.md#project-map) para código, documentação, ferramentas e continuidade. `source/` e `test.py` na raiz são os caminhos válidos deste projeto; não reorganize o upstream por estética.
+1. Consult internal memory, then OMM in scope `libmobile-bgb`. Read `project-base` with `get_role` when resuming; consult global context when useful. Memory does not replace facts verified in Git, code and evidence.
+2. For REON, libmobile or the Mobile Adapter GB protocol, use the OMM skill `reon-libmobile-expert`.
+3. Check the branch, HEAD, local changes and revision of `subprojects/libmobile`, which is maintained separately. Preserve its gitlink and the other checkout. This project's only remote is `https://github.com/zenaror/libmobile-bgb`.
+4. Use the [README map](README.md#project-map) for code, documentation, tools and continuity. `source/` and the root-level `test.py` are this project's valid locations; do not reorganize upstream files for appearance.
 
-## Durante o trabalho
+## During the work
 
-- Compile em `build/` (Linux) e em `build-windows/` com `../configure --host=x86_64-w64-mingw32 --without-system-libmobile` (Windows).
-- Rode os testes com `ln -sf build/mobile mobile && python3 test.py`. Os testes de device-auth exigem UID efetivo 0 no ambiente de teste; veja limites no [README](README.md#integration-and-validation).
-- Não faça `git commit` nem `git push` sem autorização do Operador para o trabalho. Reescrita de histórico e force-push precisam de autorização específica na própria sessão.
-- Não insira automaticamente trailers `Co-authored-by` de Claude/Anthropic nos commits. Preserve autores, coautores e créditos humanos legítimos.
-- Não crie opção para trocar o servidor de device-auth.
-- Não grave senhas, chaves (como a `device_auth_key`) nem dados pessoais em arquivos, commits ou na OMM.
+- Build in `build/` on Linux and in `build-windows/` with `../configure --host=x86_64-w64-mingw32 --without-system-libmobile` for Windows.
+- Run tests with `ln -sf build/mobile mobile && python3 test.py`. Device-auth tests require effective UID 0 in the test environment; see the limitations in the [README](README.md#integration-and-validation).
+- Do not run `git commit` or `git push` without the Operator's authorization for the work. History rewrites and force-push require specific authorization in the current session.
+- Do not automatically add Claude/Anthropic `Co-authored-by` trailers to commits. Preserve legitimate human authors, coauthors and credits.
+- Do not add an option to override the device-auth server.
+- Do not store passwords, keys (such as `device_auth_key`) or personal data in files, commits or OMM.
 
-## Ao terminar
+## When finishing
 
-Registre na OMM o conhecimento duradouro novo, com a origem (arquivo, commit ou conversa), e deixe um handoff com estado, bloqueios e próximos passos. Mantenha a memória interna e a OMM atualizadas.
+Record new durable knowledge in OMM with its source (file, commit or conversation), and leave a handoff with the state, blockers and next steps. Keep internal memory and OMM up to date.
 
-## Cleanup e retenção
+## Cleanup and retention
 
-A política canônica local está no [README.md — Cleanup and retention](README.md#cleanup-and-retention). Aplicar no fechamento/checkpoint/pausa: limpar somente saídas comprovadamente pertencentes à tarefa, após preservar evidências e verificar processos/caminhos; preservar dados reais, releases e recuperação Git. Não usar limpeza ampla nem tratar ignorados/não rastreados como descartáveis.
+The canonical local policy is in [README.md — Cleanup and retention](README.md#cleanup-and-retention). Apply it at completion, checkpoints and pauses: clean only outputs proven to belong to the task, after preserving evidence and checking processes and paths; preserve real data, releases and Git recovery artifacts. Do not use broad cleanup or treat ignored/untracked files as disposable.
